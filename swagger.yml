@@ -13,8 +13,39 @@ tags:
 paths:
     /backups:
         get:
+          tags:
+          - "backup"
+          summary: "Returns a dict holding all backups and the timestamp of the latest one."
+          produces:
+          - "application/json"
+          responses:
+            200:
+              description: "successful operation"
+              schema:
+                type: "object"
+                properties:
+                  backups:
+                    type: "array"
+                    items:
+                      type: "string"
+                      example: "2019/02/07/shop-db_2019-02-07_15-00.dump"
+                  latest:
+                    type: "string"
+                    format: "date-time"
     /deposits:
         get:
+          tags:
+          - "deposit"
+          summary: "Returns a list of all deposits."
+          produces:
+          - "application/json"
+          responses:
+            200:
+              description: "successful operation"
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/definitions/Deposit"
         post:
     /deposits/batch:
         post:
@@ -93,7 +124,7 @@ paths:
     /tags:
         get:
           tags:
-          - "tags"
+          - "tag"
           summary: "List all tags"
           description: "Every product has one or more of these."
           operationId: "listTags"
@@ -110,7 +141,9 @@ paths:
             200:
               description: "successful operation"
               schema:
-                $ref: "#/definitions/ArrayOfTags"
+                type: "array"
+                items:
+                  $ref: "#/definitions/Tag"
             401:
               description: "error state"
         post:
@@ -173,22 +206,44 @@ paths:
         get:
     /verifications:
         get:
+          tags:
+          - "verification"
+          summary: "Returns a list of all verifications."
+          produces:
+          - "application/json"
+          responses:
+            200:
+              description: "successful operation"
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/definitions/Verification"
     /verify/{verification-id}:
 definitions:
-  ArrayOfTags:
-      type: object
-      required:
-          - tags
-      properties:
-        tags:
-          type: "array"
-          items:
-            $ref: "#/definitions/Tag"
-            
   Deposit:
       type: object
       required:
           - id
+      properties:
+        admin_id:
+          type: "integer"
+          format: "int64"
+        amount:
+          type: "integer"
+          format: "int64"
+        comment:
+          type: "string"
+        id:
+          type: "integer"
+          format: "int64"
+        revoked:
+          type: "boolean"
+        timestamp:
+          type: "string"
+          format: "date-time"
+        user_id:
+            type: "integer"
+            format: "int64"
   Product:
       type: object
       required:
@@ -268,6 +323,7 @@ definitions:
               format: "int64"
           name:
               type: string
+              example: "snacks"
   Turnover:
       type: object
       required:
@@ -338,3 +394,13 @@ definitions:
       type: object
       required:
           - id
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        firstname:
+          type: "string"
+          example: "Paul Thomas"
+        lastname:
+          type: "string"
+          example: "Mann"
