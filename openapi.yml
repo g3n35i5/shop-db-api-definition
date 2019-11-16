@@ -1103,7 +1103,34 @@ paths:
       security:
       - bearerAuth: []
   /stocktakingcollections/balance:
+    parameters:
+    - name: start_id
+      in: query
+      description: The StocktakingCollection to begin the balance at
+      required: true
+      schema:
+        type: integer
+        format: int64
+    - name: end_id
+      in: query
+      description: The StocktakingCollection to end the balance at
+      required: true
+      schema:
+        type: integer
+        format: int64
     get:
+      tags:
+      - stocktakingcollection
+      summary: Returns the balance between two stocktakingcollections.
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Balance'
+      security:
+      - bearerAuth: []
   /stocktakingcollections/template:
     get:
       tags:
@@ -1629,6 +1656,51 @@ paths:
     post:
 components:
   schemas:
+    Balance:
+      type: object
+      properties:
+        balance:
+          type: integer
+          format: int64
+        loss:
+          type: integer
+          format: int64
+        profit:
+          type: integer
+          format: int64
+        products:
+          type: object
+          properties:
+            1:
+              type: object
+              properties:
+                start_count:
+                  minimum: 0
+                  type: integer
+                  format: int64
+                end_count:
+                  minimum: 0
+                  type: integer
+                  format: int64
+                purchase_count:
+                  minimum: 0
+                  type: integer
+                  format: int64
+                purchase_sum_price:
+                  type: integer
+                  format: int64
+                replenish_count:
+                  minimum: 0
+                  type: integer
+                  format: int64
+                difference:
+                  type: integer
+                  format: int64
+                balance:
+                  type: integer
+                  format: int64
+            2:
+              type: object
     Deposit:
       required:
       - id
