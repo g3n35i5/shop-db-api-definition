@@ -1591,6 +1591,33 @@ paths:
       - bearerAuth: []
   /upload:
     post:
+      tags:
+      - image
+      summary: One can upload pictures via this route.
+      description: The valid file formats can be set in the configuration under "VALID_EXTENSIONS".
+      operationId: createImage
+      requestBody:
+        content:
+          image/*:
+            schema:
+              type: string
+              format: binary
+        required: true
+      responses:
+        201:
+          description: Image uploaded successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Image uploaded successfully.
+                  filename:
+                    type: string
+      security:
+      - bearerAuth: []
   /users:
     get:
   /users/{user-id}:
@@ -2147,7 +2174,50 @@ components:
           type: string
         password_repeat:
           type: string
-    User:
+    UserUnpriv:
+      type: object
+      properties:
+        firstname:
+          type: string
+          example: Paul Thomas
+        lastname:
+          type: string
+          example: Mann
+        rank_id:
+          type: integer
+          format: int64
+    UserModify:
+      allOf:
+      - $ref: '#/components/schemas/UserUnpriv'
+      - type: object
+        properties:
+          is_admin:
+            type: boolean
+    UserBrief:
+      allOf:
+      - $ref: '#/components/schemas/UserModify'
+      - type: object
+        properties:
+          credit:
+            type: integer
+            format: int64
+            description: Users credit in cents
+          id:
+            type: integer
+            format: int64
+          creation_date:
+            type: string
+            format: date-time
+    UserFull:
+      allOf:
+      - $ref: '#/components/schemas/UserBrief'
+      - type: object
+        properties:
+          verification_date:
+            type: string
+            format: date-time
+    
+    UserDEP:
       required:
       - creation_date
       - credit
@@ -2201,4 +2271,4 @@ components:
     bearerAuth:
       type: http
       scheme: bearer
-      bearerFormat: JWT 
+      bearerFormat: JWT
