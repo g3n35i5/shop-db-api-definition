@@ -943,13 +943,177 @@ paths:
                   message:
                     type: string
                     example: Created User.
-  /replenishmentcollections: {}
-  /replenishmentcollections/{replenishmentcollections-id}: {}
-  /replenishments/{replenishment-id}: {}
-  /stocktakingcollections: {}
-  /stocktakingcollections/{stocktakingcollections-id}: {}
-  /stocktakings/{stocktaking-id}: {}
-  /tagassignment/{command}: {}
+  /replenishmentcollections:
+    get:
+      tags:
+      - replenishmentcollection
+      summary: Returns a list of all ReplenishmentCollections.
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReplenishmentCollectionBrief'
+      security:
+      - bearerAuth: []
+    post:
+      tags:
+      - replenishmentcollection
+      summary: Creates a new ReplenishmentCollection
+      description: Insert a new replenishmentcollection.
+      operationId: createReplenishmentCollection
+      requestBody:
+        description: Create a ReplenishmentCollection object
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/ReplenishmentCollectionNew'
+        required: true
+      responses:
+        201:
+          description: ReplenishmentCollection was sucessfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Created replenishmentcollection.
+      security:
+      - bearerAuth: []
+  /replenishmentcollections/{replenishmentcollections-id}:
+    parameters:
+    - name: replenishmentcollection-id
+      in: path
+      required: true
+      schema:
+        type: integer
+    get:
+      tags:
+      - replenishmentcollection
+      summary: Returns a ReplenishmentCollections by id
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ReplenishmentCollection'
+                - type: object
+                  properties:
+                    revokehistory:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/ReplenishmentCollectionRevoke'
+      security:
+      - bearerAuth: []
+    put:
+      tags:
+      - replenishmentcollection
+      summary: Updates a replenishmentcollection
+      description: This can only be done by an admin.
+      operationId: updateReplenishmentCollection
+      requestBody:
+        description: All following properties within the body are optional.
+        content:
+          '*/*':
+            schema:
+              type: object
+              properties:
+                comment:
+                  type: string
+                revoked:
+                  type: boolean
+                timestamp:
+                  type: string
+                  format: date-time
+        required: true
+      responses:
+        201:
+          description: ReplenishmentCollection was sucessfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Updated replenishmentcollection.
+                  updated_fields:
+                    type: array
+                    items:
+                      type: string
+        401:
+          description: error state
+          content: {}
+      security:
+      - bearerAuth: []
+  /replenishments/{replenishment-id}:
+    parameters:
+    - name: replenishment-id
+      in: path
+      required: true
+      schema:
+        type: integer
+    put:
+      tags:
+      - replenishment
+      summary: Updates a replenishment
+      description: This can only be done by an admin.
+      operationId: updateReplenishment
+      requestBody:
+        description: All following properties within the body are optional.
+        content:
+          '*/*':
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: integer
+                  format: int64
+                revoked:
+                  type: boolean
+                total_price:
+                  type: integer
+                  format: int64
+        required: true
+      responses:
+        201:
+          description: Replenishment was sucessfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Updated replenishment.
+                  updated_fields:
+                    type: array
+                    items:
+                      type: string
+        401:
+          description: error state
+          content: {}
+      security:
+      - bearerAuth: []
+  /stocktakingcollections/balance:
+    get:
+  /stocktakingcollections/template:
+    get:
+  /stocktakingcollections:
+    get:
+    post:
+  /stocktakingcollections/{stocktakingcollections-id}:
+    get:
+    put:
+  /stocktakings/{stocktaking-id}:
+    put:
+  /tagassignment/{command}:
+    post:
   /tags:
     get:
       tags:
@@ -977,11 +1141,20 @@ paths:
         401:
           description: error state
           content: {}
-  /tags/{tag-id}: {}
-  /turnovers: {}
-  /turnovers/{turnover-id}: {}
-  /upload: {}
-  /users: {}
+    post:
+  /tags/{tag-id}:
+    get:
+    put:
+  /turnovers:
+    get:
+    post:
+  /turnovers/{turnover-id}:
+    get:
+    put:
+  /upload:
+    post:
+  /users:
+    get:
   /users/{user-id}:
     get:
       tags:
@@ -1018,10 +1191,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DeleteUserError'
-  /users/{user-id}/deposits: {}
-  /users/{user-id}/favourites: {}
-  /users/{user-id}/purchases: {}
-  /users/{user-id}/refunds: {}
+    put:
+  /users/{user-id}/deposits:
+    get:
+  /users/{user-id}/favourites:
+    get:
+  /users/{user-id}/purchases:
+    get:
+  /users/{user-id}/refunds:
+    get:
   /verifications:
     get:
       tags:
@@ -1036,6 +1214,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Verification'
+  /verify/{user-id}:
+    post:
 components:
   schemas:
     Deposit:
@@ -1203,6 +1383,81 @@ components:
         admin_id:
           type: integer
           format: int64
+    ReplenishmentNew:
+      type: object
+      required:
+        - product_id
+        - amount
+        - total_price
+      properties:
+        amount:
+          type: integer
+          format: int64
+        product_id:
+          type: integer
+          format: int64
+        total_price:
+          type: integer
+          format: int64
+    Replenishment:
+      type: object
+      properties:
+        amount:
+          type: integer
+          format: int64
+        id:
+          type: integer
+          format: int64
+        product_id:
+          type: integer
+          format: int64
+        replcoll_id:
+          type: integer
+          format: int64
+        total_price:
+          type: integer
+          format: int64
+    ReplenishmentCollectionNew:
+      type: object
+      required:
+        - replenishments
+        - comment
+      properties:
+        comment:
+          type: string
+        replenishments:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReplenishmentNew'
+    ReplenishmentCollectionBrief:
+      type: object
+      properties:
+        admin_id:
+          type: integer
+          format: int64
+        comment:
+          type: string
+        id:
+          type: integer
+          format: int64
+        price:
+          type: integer
+          format: int64
+        revoked:
+          type: boolean
+        timestamp:
+          type: string
+          format: date-time
+    ReplenishmentCollection:
+      allOf:
+        - $ref: '#/components/schemas/ReplenishmentCollectionNew'
+        - $ref: '#/components/schemas/ReplenishmentCollectionBrief'
+        - type: object
+          properties:
+            replenishments:
+              type: array
+              items:
+                $ref: '#/components/schemas/Replenishment'
     StocktakingCollection:
       type: object
     Tag:
@@ -1269,6 +1524,9 @@ components:
       allOf:
       - $ref: '#/components/schemas/Revoke'
     RefundRevoke:
+      allOf:
+      - $ref: '#/components/schemas/Revoke'
+    ReplenishmentCollectionRevoke:
       allOf:
       - $ref: '#/components/schemas/Revoke'
     NewUser:
