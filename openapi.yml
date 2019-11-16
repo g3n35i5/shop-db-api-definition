@@ -569,10 +569,231 @@ paths:
           content: {}
       security:
       - bearerAuth: []
-  /products/{product-id}: {}
-  /products/{product-id}/pricehistory: {}
-  /purchases: {}
-  /purchases/{purchase-id}: {}
+  /products/{product-id}:
+    parameters:
+    - name: product-id
+      in: path
+      required: true
+      schema:
+        type: integer
+    get:
+      tags:
+      - product
+      summary: Returns the product with the requested id.
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+    put:
+      tags:
+      - product
+      summary: Updates a product
+      description: This can only be done by an admin.
+      operationId: updateProduct
+      requestBody:
+        description: All following properties within the body are optional.
+        content:
+          '*/*':
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                price:
+                  type: integer
+                  format: int64
+                barcode:
+                  type: string
+                imagename:
+                  type: string
+                countable:
+                  type: boolean
+                revocable:
+                  type: boolean
+        required: true
+      responses:
+        201:
+          description: Product was sucessfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Updated product.
+                  updated_fields:
+                    type: array
+                    items:
+                      type: string
+        401:
+          description: error state
+          content: {}
+      security:
+      - bearerAuth: []
+  /products/{product-id}/pricehistory:
+    parameters:
+    - name: product-id
+      in: path
+      required: true
+      schema:
+        type: integer
+    - name: end_date
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date-time
+    - name: start_date
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date-time
+    get:
+      tags:
+      - product
+      summary: Returns the pricehistory of the requested product id.
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      format: int64
+                    timestamp:
+                      type: string
+                      format: date-time
+                    price:
+                      type: integer
+                      format: int64
+      security:
+      - bearerAuth: []
+  /purchases:
+    get:
+      tags:
+      - purchase
+      summary: Returns a list of all purchases.
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Purchase'
+    post:
+      tags:
+      - purchase
+      summary: Add a new purchase
+      operationId: addPurchase
+      requestBody:
+        description: Purchase object that needs to be added
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                  format: int64
+                product_id:
+                  type: integer
+                  format: int64
+                amount:
+                  type: integer
+                  format: int64
+        required: true
+      responses:
+        200:
+          description: Purchase was sucessfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Purchase created.
+        401:
+          description: error state
+          content: {}
+      security:
+      - bearerAuth: []
+  /purchases/{purchase-id}:
+    parameters:
+    - name: purchase-id
+      in: path
+      required: true
+      schema:
+        type: integer
+    get:
+      tags:
+      - purchase
+      summary: Returns the purchase with the requested id.
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Purchase'
+                - type: object
+                  properties:
+                    revokehistory:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/PurchaseRevoke'
+    put:
+      tags:
+      - purchase
+      summary: Updates a purchase
+      description: This can only be done by an admin.
+      operationId: updatePurchase
+      requestBody:
+        description: All following properties within the body are optional.
+        content:
+          '*/*':
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: integer
+                  format: int64
+                revoked:
+                  type: boolean
+        required: true
+      responses:
+        201:
+          description: Product was sucessfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Updated product.
+                  updated_fields:
+                    type: array
+                    items:
+                      type: string
+        401:
+          description: error state
+          content: {}
+      security:
+      - bearerAuth: []
   /ranks:
     get:
       tags:
@@ -587,8 +808,116 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Rank'
-  /refunds: {}
-  /refunds/{refund-id}: {}
+  /refunds:
+    get:
+      tags:
+      - refunds
+      summary: Returns a list of all refunds.
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Refund'
+                - type: object
+                  properties:
+                    revokehistory:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/RefundRevoke'
+    post:
+      tags:
+      - refund
+      summary: Add a new refund
+      operationId: addRefund
+      requestBody:
+        description: Refund object that needs to be added
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                  format: int64
+                total_price:
+                  type: integer
+                  format: int64
+                comment:
+                  type: string
+        required: true
+      responses:
+        200:
+          description: Refund was sucessfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Created Refund.
+        401:
+          description: error state
+          content: {}
+      security:
+      - bearerAuth: []
+  /refunds/{refund-id}:
+    parameters:
+    - name: refund-id
+      in: path
+      required: true
+      schema:
+        type: integer
+    get:
+      tags:
+      - refund
+      summary: Returns the refund with the requested id.
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refund'
+    put:
+      tags:
+      - refund
+      summary: Updates a refund
+      description: This can only be done by an admin.
+      operationId: updateRefund
+      requestBody:
+        description: All following properties within the body are optional.
+        content:
+          '*/*':
+            schema:
+              type: object
+              properties:
+                revoked:
+                  type: boolean
+        required: true
+      responses:
+        201:
+          description: Refund was sucessfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Updated refund.
+                  updated_fields:
+                    type: array
+                    items:
+                      type: string
+        401:
+          description: error state
+          content: {}
+      security:
+      - bearerAuth: []
   /register: {}
   /replenishmentcollections: {}
   /replenishmentcollections/{replenishmentcollections-id}: {}
@@ -734,6 +1063,37 @@ components:
         timestamp:
           type: "string"
           format: "date-time"
+    Purchase:
+      required:
+      - id
+      - timestamp
+      - user_id
+      - product_id
+      - productprice
+      - amount
+      - revoked
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        timestamp:
+          type: "string"
+          format: "date-time"
+        user_id:
+          type: "integer"
+          format: "int64"
+        product_id:
+          type: "integer"
+          format: "int64"
+        productprice:
+          type: "integer"
+          format: "int64"
+        amount:
+          type: "integer"
+          format: "int64"
+        revoked:
+          type: "boolean"
+        
     Product:
       required:
       - creation_date
@@ -787,6 +1147,36 @@ components:
         active:
           type: boolean
         debt_limit:
+          type: integer
+          format: int64
+    Refund:
+      required:
+      - id
+      - timestamp
+      - user_id
+      - total_price
+      - comment
+      - revoked
+      - admin_id
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        timestamp:
+          type: string
+          format: date-time
+        user_id:
+          type: integer
+          format: int64
+        total_price:
+          type: integer
+          format: int64
+        comment:
+          type: string
+        revoked:
+          type: boolean
+        admin_id:
           type: integer
           format: int64
     StocktakingCollection:
@@ -849,6 +1239,12 @@ components:
           type: string
           format: date-time
     PayoffRevoke:
+      allOf:
+      - $ref: '#/components/schemas/Revoke'
+    PurchaseRevoke:
+      allOf:
+      - $ref: '#/components/schemas/Revoke'
+    RefundRevoke:
       allOf:
       - $ref: '#/components/schemas/Revoke'
     User:
