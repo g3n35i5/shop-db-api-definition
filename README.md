@@ -1,0 +1,1 @@
+# shop-db-api-definition
