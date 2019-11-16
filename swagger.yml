@@ -104,6 +104,45 @@ paths:
         get:
     /verify/{verification-id}
 definitions:
+  Deposit:
+      type: object
+      required:
+          - id
+  Ranks:
+      type: object
+      required:
+          - id
+          - name
+          - active
+          - debt_limit
+      properties:
+          id:
+              type:
+              example:
+              description:
+              
+  StocktakingCollection:
+      type: object
+      required:
+          - id
+  Tag:
+      type: object
+      required:
+          - id
+  Turnover:
+      type: object
+      required:
+          - id
+  User:
+      type: object
+      required:
+          - id
+  Verification:
+      type: object
+      required:
+          - id
+  
+  
     # Added by API Auto Mocking Plugin
     host: mybookstore.com
     basePath: /api/v1
