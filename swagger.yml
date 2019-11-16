@@ -11,6 +11,20 @@ tags:
 - name: "rank"
   description: "Access available ranks"
 paths:
+    /:
+        get:
+          tags:
+          - "maintenance"
+          summary: "Returns the current state of the api"
+          responses:
+            200:
+              description: "State was successfully retrieved"
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+                    example: "Backend is online."
     /backups:
         get:
           tags:
@@ -47,16 +61,257 @@ paths:
                 items:
                   $ref: "#/definitions/Deposit"
         post:
+          tags:
+          - "deposit"
+          summary: "Add a new deposit"
+          description: ""
+          operationId: "addDeposit"
+          consumes:
+          - "application/json"
+          produces:
+          - "application/json"
+          parameters:
+          - in: "body"
+            name: "body"
+            description: "Deposit object that needs to be added"
+            required: true
+            schema:
+              type: "object"
+              properties:
+                amount:
+                  type: "integer"
+                  format: "int64"
+                comment:
+                  type: "string"
+                user_id:
+                  type: "integer"
+                  format: "int64"
+          responses:
+            200:
+              description: "Deposit was sucessfully created"
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+                    example: "Created deposit."
+            401:
+              description: "error state"
     /deposits/batch:
         post:
-    /deposits/{user-id}:
+          tags:
+          - "deposit"
+          summary: "Add a batch of new deposits"
+          description: "Iterates over the given user ids and creates a deposit for each of them"
+          operationId: "addDeposits"
+          consumes:
+          - "application/json"
+          produces:
+          - "application/json"
+          parameters:
+          - in: "body"
+            name: "body"
+            description: "List of user ids, the amount as well as the comment"
+            required: true
+            schema:
+              type: "object"
+              properties:
+                amount:
+                  type: "integer"
+                  format: "int64"
+                comment:
+                  type: "string"
+                user_ids:
+                  type: "array"
+                  items:
+                    type: "integer"
+                    format: "int64"
+          responses:
+            200:
+              description: "Deposit was sucessfully created"
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+                    example: "Created batch deposit."
+            401:
+              description: "error state"
+    /deposits/{deposit-id}:
         get:
+          tags:
+          - "deposit"
+          summary: "Returns the deposit with the requested id."
+          produces:
+          - "application/json"
+          responses:
+            200:
+              description: "successful operation"
+              schema:
+                type: "object"
+                properties:
+                  id:
+                    type: "integer"
+                    format: "int64"
+                  timestamp:
+                    type: "string"
+                    format: "date-time"
+                  user_id:
+                    type: "integer"
+                    format: "int64"
+                  amount:
+                    type: "integer"
+                    format: "int64"
+                  comment:
+                    type: "string"
+                  revoked:
+                    type: "boolean"
+                  revokehistory:
+                    type: "array"
+                    items:
+                      $ref: '#/definitions/Revoke'
         put:
+          tags:
+          - "deposit"
+          summary: "Updates a deposit"
+          description: "This can only be done by an admin."
+          operationId: "updateDeposit"
+          produces:
+          - "application/json"
+          parameters:
+          - in: "body"
+            name: "body"
+            description: "Updated deposit revocation state"
+            required: true
+            schema:
+              type: "object"
+              properties:
+                revoked:
+                  type: "boolean"
+          responses:
+            201:
+              description: "Deposit was sucessfully updated"
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+                    example: "Updated deposit."
+            401:
+              description: "error state"
     /financial_overview:
         get:
+          tags:
+          - "financial overview"
+          summary: "Returns the current financial overview of the shopdb instance"
+          description: "The financial status of the entire project can be retrieved via this route.
+                        All purchases, deposits, payoffs, refunds and replenishmentcollections are
+                        used for this purpose. The items are cleared once to a number indicating
+                        whether the community has debt or surplus money. In addition, the
+                        individual items are returned separately in order to get a better
+                        breakdown of the items."
+          produces:
+          - "application/json"
+          responses:
+            200:
+              description: "successful operation"
+              schema:
+                type: "object"
+                properties:
+                  total_balance:
+                    type: "integer"
+                    format: "int64"
+                  incomes:
+                    type: "object"
+                    properties:
+                      Purchases:
+                        type: "integer"
+                        format: "int64"
+                        minimum: 0
+                      Deposits:
+                        type: "integer"
+                        format: "int64"
+                        minimum: 0
+                      Turnovers:
+                        type: "integer"
+                        format: "int64"
+                        minimum: 0
+                      Replenishments:
+                        type: "integer"
+                        format: "int64"
+                        minimum: 0
+                      Refunds:
+                        type: "integer"
+                        format: "int64"
+                        minimum: 0
+                      Payoffs:
+                        type: "integer"
+                        format: "int64"
+                        minimum: 0
+                      Stocktakings:
+                        type: "integer"
+                        format: "int64"
+                        minimum: 0
+                  expenses:
+                    type: "object"
+                    properties:
+                      Purchases:
+                        type: "integer"
+                        format: "int64"
+                        minimum: 0
+                      Deposits:
+                        type: "integer"
+                        format: "int64"
+                        minimum: 0
+                      Turnovers:
+                        type: "integer"
+                        format: "int64"
+                        minimum: 0
+                      Replenishments:
+                        type: "integer"
+                        format: "int64"
+                        minimum: 0
+                      Refunds:
+                        type: "integer"
+                        format: "int64"
+                        minimum: 0
+                      Payoffs:
+                        type: "integer"
+                        format: "int64"
+                        minimum: 0
+                      Stocktakings:
+                        type: "integer"
+                        format: "int64"
+                        minimum: 0
     /images:
         get:
+          tags:
+          - "image"
+          summary: "A defaullt picture can be requested via this route."
+          responses:
+            200:
+              description: A png file
+              schema:
+                type: file
+                description: the default product image
     /images/{image-name}:
+        get:
+          tags:
+          - "image"
+          summary: "A picture can be requested via this route."
+          description: "If the image is not found or if the image name is empty, a default image will be returned."
+          parameters:
+          - name: "image-name"
+            in: "path"
+            description: "can be left empty to retrieve the "
+            required: true
+            type: "string"
+          responses:
+            200:
+              description: A png file
+              schema:
+                type: file
+                description: the requested product image
     /login:
         post:
     /maintenance:
@@ -354,6 +609,23 @@ definitions:
           type: string
           enum: 
           - "error"
+  Revoke:
+      type: "object"
+      required:
+        - id
+        - revoked
+        - timestamp
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        revoked:
+          type: "boolean"
+        timestamp:
+          type: "string"
+          format: "date-time"
+        
+        
   User:
       type: object
       required:
