@@ -3,112 +3,162 @@ info:
     title: ShopDB API
     description: This is the API for shopdb2
     version: v2
+host: "shop.gatrobe.de"
+basePath: "/api"
+schemes:
+- https
+tags:
+- name: "rank"
+  description: "Access available ranks"
 paths:
-    /backups
+    /backups:
         get:
-    /deposits
+    /deposits:
         get:
         post:
-    /deposits/batch
+    /deposits/batch:
         post:
-    /deposits/{user-id}
+    /deposits/{user-id}:
         get:
         put:
-    /financial_overview
+    /financial_overview:
         get:
-    /images
+    /images:
         get:
-    /images/{image-name}
-    /login
+    /images/{image-name}:
+    /login:
         post:
-    /maintenance
+    /maintenance:
         post:
-    /payoffs
+    /payoffs:
         get:
         post:
-    /payoffs/{payoff-id}
+    /payoffs/{payoff-id}:
         get:
         put:
-    /products
+    /products:
         get:
         post:
-    /products/{product-id}
+    /products/{product-id}:
         get:
         put:
-    /products/{product-id}/pricehistory
+    /products/{product-id}/pricehistory:
         get:
-    /purchases
+    /purchases:
         get:
         post:
-    /purchases/{purchase-id}
+    /purchases/{purchase-id}:
         get:
         put:
-    /ranks
+    /ranks:
         get:
-    /refunds
+          tags:
+          - "rank"
+          summary: "Returns a list of all ranks."
+          produces:
+          - "application/json"
+          responses:
+            200:
+              description: "successful operation"
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/definitions/Rank"
+    /refunds:
         get:
         post:
-    /refunds/{refund-id}
+    /refunds/{refund-id}:
         get:
         put:
-    /register
+    /register:
         post:
-    /replenishmentcollections
+    /replenishmentcollections:
         get:
         post:
-    /replenishmentcollections/{replenishmentcollections-id}
+    /replenishmentcollections/{replenishmentcollections-id}:
         get:
         post:
-    /replenishments/{replenishment-id}
+    /replenishments/{replenishment-id}:
         put:
-    /stocktakingcollections
+    /stocktakingcollections:
         get:
         post:
-    /stocktakingcollections/{stocktakingcollections-id}
+    /stocktakingcollections/{stocktakingcollections-id}:
         get:
         put:
-    /stocktakings/{stocktaking-id}
+    /stocktakings/{stocktaking-id}:
         put:
-    /tagassignment/{command}
+    /tagassignment/{command}:
         post:
-    /tags
+    /tags:
         get:
         post:
-    /tags/{tag-id}
+    /tags/{tag-id}:
         delete:
         get:
         put:
-    /turnovers
+    /turnovers:
         get:
         put:
-    /turnovers/{turnover-id}
+    /turnovers/{turnover-id}:
         get:
         put:
-    /upload
+    /upload:
         post:
-    /users
+    /users:
         get:
-    /users/{user-id}
+    /users/{user-id}:
         delete:
+          tags:
+          - "user"
+          summary: "Delete user"
+          description: "This can only be done by an admin."
+          operationId: "deleteUser"
+          produces:
+          - "application/json"
+          parameters:
+          - name: "id"
+            in: "path"
+            description: "The id"
+            required: true
+            type: "integer"
+            format: "int64"
+          responses:
+            401:
+              description: "error state"
         get:
+          tags:
+          - "user"
+          summary: "Returns a user"
+          produces:
+          - "application/json"
+          responses:
+            200:
+              description: "successful operation"
+              schema:
+                $ref: "#/definitions/User"
+            401:
+              description: "error state"
+              schema:
+                $ref: "#/definitions/DeleteUserError"
         put:
-    /users/{user-id}/deposits
+    /users/{user-id}/deposits:
         get:
-    /users/{user-id}/favourites
+    /users/{user-id}/favourites:
         get:
-    /users/{user-id}/purchases
+    /users/{user-id}/purchases:
         get:
-    /users/{user-id}/refunds
+    /users/{user-id}/refunds:
         get:
-    /verifications
+    /verifications:
         get:
-    /verify/{verification-id}
+    /verify/{verification-id}:
 definitions:
   Deposit:
       type: object
       required:
           - id
-  Ranks:
+  Rank:
       type: object
       required:
           - id
@@ -117,10 +167,15 @@ definitions:
           - debt_limit
       properties:
           id:
-              type:
-              example:
-              description:
-              
+              type: "integer"
+              format: "int64"
+          name:
+              type: "string"
+          active:
+              type: "boolean"
+          debt_limit:
+              type: "integer"
+              format: "int64"
   StocktakingCollection:
       type: object
       required:
@@ -133,18 +188,69 @@ definitions:
       type: object
       required:
           - id
+  UserError:
+      type: object
+      required:
+        - message
+        - result
+      properties:
+        message:
+          type: string
+          example: "This user has not been verified yet."
+        result:
+          type: string
+          enum: 
+          - "error"
+  DeleteUserError:
+      type: object
+      required:
+        - message
+        - result
+      properties:
+        message:
+          type: string
+          example: "There is no entry with this id."
+        result:
+          type: string
+          enum: 
+          - "error"
   User:
       type: object
       required:
-          - id
+        - id
+        - firstname
+        - lastname
+        - credit
+        - rank_id
+        - is_admin
+        - creation_date
+        - verification_date
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        firstname:
+          type: "string"
+          example: "Paul Thomas"
+        lastname:
+          type: "string"
+          example: "Mann"
+        credit:
+          type: "integer"
+          description: "Users credit in cents"
+          format: "int64"
+        rank_id:
+          type: "integer"
+          format: "int64"
+        is_admin:
+          type: "boolean"
+        creation_date:
+          type: "string"
+          format: "date-time"
+        verification_date:
+          type: "string"
+          format: "date-time"
   Verification:
       type: object
       required:
           - id
-  
-  
-    # Added by API Auto Mocking Plugin
-    host: mybookstore.com
-    basePath: /api/v1
-    schemes:
-        - https
