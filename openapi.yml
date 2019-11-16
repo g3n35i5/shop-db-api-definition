@@ -1260,8 +1260,82 @@ paths:
           content: {}
       security:
       - bearerAuth: []
-  /tagassignment/{command}:
+  /tagassignment/add:
     post:
+      tags:
+      - tag
+      - product
+      summary: Assigns a tag to  or from a product
+      description: Assign a tag.
+      operationId: assignTag
+      requestBody:
+        description: The ids of the tag and the product to connect.
+        content:
+          '*/*':
+            schema:
+              type: object
+              required:
+                - tag_id
+                - product_id
+              properties:
+                tag_id:
+                  type: integer
+                  format: int64
+                product_id:
+                  type: integer
+                  format: int64
+        required: true
+      responses:
+        201:
+          description: Tag has been sucessfully assigned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Tag assignment has been added.
+      security:
+      - bearerAuth: []
+  /tagassignment/remove:
+    post:
+      tags:
+      - tag
+      - product
+      summary: Removes a tag to  or from a product
+      description: Remove a tag.
+      operationId: removeTag
+      requestBody:
+        description: The ids of the tag and the product to connect.
+        content:
+          '*/*':
+            schema:
+              type: object
+              required:
+                - tag_id
+                - product_id
+              properties:
+                tag_id:
+                  type: integer
+                  format: int64
+                product_id:
+                  type: integer
+                  format: int64
+        required: true
+      responses:
+        201:
+          description: Tag was sucessfully removed from product
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Tag assignment has been removed.
+      security:
+      - bearerAuth: []
   /tags:
     get:
       tags:
@@ -1269,14 +1343,6 @@ paths:
       summary: List all tags
       description: Every product has one or more of these.
       operationId: listTags
-      parameters:
-      - name: id
-        in: path
-        description: The id
-        required: true
-        schema:
-          type: integer
-          format: int64
       responses:
         200:
           description: successful operation
@@ -1290,9 +1356,102 @@ paths:
           description: error state
           content: {}
     post:
+      tags:
+      - tag
+      summary: Creates a new Tag
+      description: Insert a new Tag.
+      operationId: createTag
+      requestBody:
+        description: Create a Tag object
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/TagUpdateable'
+        required: true
+      responses:
+        201:
+          description: Tag was sucessfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Created tag.
+      security:
+      - bearerAuth: []
   /tags/{tag-id}:
+    parameters:
+    - name: tag-id
+      in: path
+      description: The id
+      required: true
+      schema:
+        type: integer
+        format: int64
+    delete:
+      tags:
+      - tag
+      summary: Delete tag
+      description: This can only be done by an admin.
+      operationId: deleteTag
+      responses:
+        401:
+          description: error state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteTagError'
+      security:
+      - bearerAuth: []
     get:
+      tags:
+      - tag
+      summary: Show one tag
+      description: Every product has one or more of these.
+      operationId: showTag
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
     put:
+      tags:
+      - tag
+      summary: Updates a tag
+      description: This can only be done by an admin.
+      operationId: updateTag
+      requestBody:
+        description: The name property is mandatory.
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/TagUpdateable'
+        required: true
+      responses:
+        201:
+          description: Tag was sucessfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Updated tag.
+                  updated_fields:
+                    type: array
+                    items:
+                      type: string
+                      example: name
+        401:
+          description: error state
+          content: {}
+      security:
+      - bearerAuth: []
   /turnovers:
     get:
     post:
@@ -1677,21 +1836,27 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/Stocktaking'
-            
-    Tag:
+    TagUpdateable:
       required:
-      - id
+      - name
       type: object
       properties:
-        created_by:
-          type: integer
-          format: int64
-        id:
-          type: integer
-          format: int64
         name:
           type: string
           example: snacks
+    Tag:
+      allOf:
+        - type: object
+          required:
+          - id
+          properties:
+            created_by:
+              type: integer
+              format: int64
+            id:
+              type: integer
+              format: int64
+        - $ref: '#/components/schemas/TagUpdateable'
     Turnover:
       type: object
     UserError:
@@ -1716,6 +1881,19 @@ components:
         message:
           type: string
           example: There is no entry with this id.
+        result:
+          type: string
+          enum:
+          - error
+    DeleteTagError:
+      required:
+      - message
+      - result
+      type: object
+      properties:
+        message:
+          type: string
+          example: The entry cannot be deleted.
         result:
           type: string
           enum:
