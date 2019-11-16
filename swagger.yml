@@ -92,6 +92,27 @@ paths:
         post:
     /tags:
         get:
+          tags:
+          - "tags"
+          summary: "List all tags"
+          description: "Every product has one or more of these."
+          operationId: "listTags"
+          produces:
+          - "application/json"
+          parameters:
+          - name: "id"
+            in: "path"
+            description: "The id"
+            required: true
+            type: "integer"
+            format: "int64"
+          responses:
+            200:
+              description: "successful operation"
+              schema:
+                $ref: "#/definitions/ArrayOfTags"
+            401:
+              description: "error state"
         post:
     /tags/{tag-id}:
         delete:
@@ -126,6 +147,8 @@ paths:
           responses:
             401:
               description: "error state"
+              schema:
+                $ref: "#/definitions/DeleteUserError"
         get:
           tags:
           - "user"
@@ -139,8 +162,6 @@ paths:
                 $ref: "#/definitions/User"
             401:
               description: "error state"
-              schema:
-                $ref: "#/definitions/DeleteUserError"
         put:
     /users/{user-id}/deposits:
         get:
@@ -154,10 +175,64 @@ paths:
         get:
     /verify/{verification-id}:
 definitions:
+  ArrayOfTags:
+      type: object
+      required:
+          - tags
+      properties:
+        tags:
+          type: "array"
+          items:
+            $ref: "#/definitions/Tag"
+            
   Deposit:
       type: object
       required:
           - id
+  Product:
+      type: object
+      required:
+          - active
+          - barcode
+          - countable
+          - creation_date
+          - id
+          - imagename
+          - name
+          - price
+          - revocable
+          - tags
+      properties:
+        active:
+            type: "boolean"
+        barcode:
+            type: "string"
+            example: "4004870070190"
+            nullable: true
+        countable:
+            type: "boolean"
+        creation_date:
+            type: "string"
+            format: "date-time"
+        id:
+            type: "integer"
+            format: "int64"
+        imagename:
+            type: "string"
+            nullable: true
+            example: "db2d6309800a5af05f9814bea1f5cea0.png"
+        name:
+            type: "string"
+        price:
+            type: "integer"
+            format: "int64"
+        revocable:
+            type: "boolean"
+        tags:
+            type: array
+            items:
+              type: "integer"
+              format: "int64"
   Rank:
       type: object
       required:
@@ -184,6 +259,15 @@ definitions:
       type: object
       required:
           - id
+      properties:
+          created_by:
+              type: "integer"
+              format: "int64"
+          id:
+              type: "integer"
+              format: "int64"
+          name:
+              type: string
   Turnover:
       type: object
       required:
