@@ -8,6 +8,8 @@ servers:
 tags:
 - name: rank
   description: Access available ranks
+- name: turnover
+  description: Turnovers describe all income and expenses, independent of purchases, etc.
 paths:
   /:
     get:
@@ -1454,10 +1456,112 @@ paths:
       - bearerAuth: []
   /turnovers:
     get:
+      tags:
+      - turnover
+      summary: List all turnovers
+      operationId: listTurnovers
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: '#/components/schemas/TurnoverBase'
+                    - type: object
+                      properties:
+                        admin_id:
+                          type: integer
+                          format: int64
+        401:
+          description: error state
+          content: {}
     post:
+      tags:
+      - turnover
+      summary: Creates a new Turnover
+      description: Insert a new Turnover.
+      operationId: createTurnover
+      requestBody:
+        description: Create a Turnover object
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/TurnoverNew'
+        required: true
+      responses:
+        201:
+          description: Turnover was sucessfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Created turnover.
+      security:
+      - bearerAuth: []
   /turnovers/{turnover-id}:
+    parameters:
+    - name: turnover-id
+      in: path
+      description: The id of the turnover to interact with
+      required: true
+      schema:
+        type: integer
+        format: int64
     get:
+      tags:
+      - turnover
+      summary: Show one turnover
+      description: Turnovers describe all income and expenses, independent of purchases, etc.
+      operationId: showTurnover
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/TurnoverBase'
+                  - type: object
+                    properties:
+                      revokehistory:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/TurnoverRevoke'
     put:
+      tags:
+      - turnover
+      summary: Updates a turnover
+      description: This can only be done by an admin.
+      operationId: updateTurnover
+      requestBody:
+        description: The revoked property is mandatory.
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/TurnoverUpdateable'
+        required: true
+      responses:
+        201:
+          description: Turnover was sucessfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Updated turnover.
+        401:
+          description: error state
+          content: {}
+      security:
+      - bearerAuth: []
   /upload:
     post:
   /users:
@@ -1857,8 +1961,35 @@ components:
               type: integer
               format: int64
         - $ref: '#/components/schemas/TagUpdateable'
-    Turnover:
+    TurnoverNew:
+      required:
+      - amount
+      - comment
       type: object
+      properties:
+        amount:
+          type: integer
+          format: int64
+          example: 1
+        comment:
+          type: string
+    TurnoverUpdateable:
+      type: object
+      properties:
+        revoked:
+          type: boolean
+    TurnoverBase:
+      allOf:
+        - $ref: '#/components/schemas/TurnoverNew'
+        - $ref: '#/components/schemas/TurnoverUpdateable'
+        - type: object
+          properties:
+            id:
+              type: integer
+              format: int64
+            timestamp:
+              type: string
+              format: date-time
     UserError:
       required:
       - message
@@ -1926,6 +2057,9 @@ components:
       allOf:
       - $ref: '#/components/schemas/Revoke'
     StocktakingCollectionRevoke:
+      allOf:
+      - $ref: '#/components/schemas/Revoke'
+    TurnoverRevoke:
       allOf:
       - $ref: '#/components/schemas/Revoke'
     NewUser:
