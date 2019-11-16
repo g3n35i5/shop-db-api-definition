@@ -1620,7 +1620,32 @@ paths:
       - bearerAuth: []
   /users:
     get:
+      tags:
+      - user
+      summary: Returns a list of all users.
+      description: Requesting this ressource while being an authenticated admin, yields more detailed results.
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - type: array
+                  items:
+                    $ref: '#/components/schemas/UserBrief'
+                - type: array
+                  items:
+                    $ref: '#/components/schemas/UserUnpriv'
   /users/{user-id}:
+    parameters:
+    - name: user-id
+      in: path
+      description: The users primary identifier
+      required: true
+      schema:
+        type: integer
+        format: int64
     get:
       tags:
       - user
@@ -1631,7 +1656,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/UserFull'
         401:
           description: error state
           content: {}
@@ -1657,14 +1682,103 @@ paths:
               schema:
                 $ref: '#/components/schemas/DeleteUserError'
     put:
+      tags:
+      - user
+      summary: Updates a user
+      description: This can only be done by an admin.
+      operationId: updateUser
+      requestBody:
+        description: Updating the password is only successful if password and its repetition match.
+        content:
+          '*/*':
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/UserModify'
+                - type: object
+                  properties:
+                    password:
+                      type: string
+                    password_repeat:
+                      type: string
+        required: true
+      responses:
+        201:
+          description: User was sucessfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Updated user.
+                  updated_fields:
+                    type: array
+                    items:
+                      type: string
+                      example: is_admin
+        401:
+          description: error state
+          content: {}
+      security:
+      - bearerAuth: []
   /users/{user-id}/deposits:
     get:
-  /users/{user-id}/favourites:
+      tags:
+      - user
+      summary: Returns a list of a users deposits.
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DepositOfUser'
+  /users/{user-id}/favorites:
     get:
+      tags:
+      - user
+      summary: Returns a list of a users favorite products ids.
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: integer
+                  format: int64
   /users/{user-id}/purchases:
     get:
+      tags:
+      - user
+      summary: Returns a list of a users purchases.
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PurchaseOfUser'
   /users/{user-id}/refunds:
     get:
+      tags:
+      - user
+      summary: Returns a list of a users refunds.
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RefundOfUser'
   /verifications:
     get:
       tags:
@@ -1680,7 +1794,46 @@ paths:
                 items:
                   $ref: '#/components/schemas/Verification'
   /verify/{user-id}:
+    parameters:
+    - name: user-id
+      in: path
+      description: The id of the user to verify
+      required: true
+      schema:
+        type: integer
+        format: int64
     post:
+      tags:
+      - verification
+      summary: Creates a new Verification
+      description: Inserts the first Rank assignment to a user.
+      operationId: createVerification
+      requestBody:
+        description: Create the first verification object of a user
+        content:
+          '*/*':
+            schema:
+              type: object
+              required:
+                - rank_id
+              properties:
+                rank_id:
+                  type: integer
+                  format: int64
+        required: true
+      responses:
+        201:
+          description: Verification was sucessful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Verified user.
+      security:
+      - bearerAuth: []
 components:
   schemas:
     Balance:
@@ -1728,7 +1881,7 @@ components:
                   format: int64
             2:
               type: object
-    Deposit:
+    DepositOfUser:
       required:
       - id
       type: object
@@ -1749,9 +1902,14 @@ components:
         timestamp:
           type: string
           format: date-time
-        user_id:
-          type: integer
-          format: int64
+    Deposit:
+      allOf:
+        - $ref: '#/components/schemas/DepositOfUser'
+        - type: object
+          properties:
+            user_id:
+              type: integer
+              format: int64
     Payoff:
       required:
       - admin_id
@@ -1777,11 +1935,11 @@ components:
         timestamp:
           type: "string"
           format: "date-time"
-    Purchase:
+    PurchaseOfUser:
+      type: object
       required:
       - id
       - timestamp
-      - user_id
       - product_id
       - productprice
       - amount
@@ -1793,9 +1951,6 @@ components:
         timestamp:
           type: "string"
           format: "date-time"
-        user_id:
-          type: "integer"
-          format: "int64"
         product_id:
           type: "integer"
           format: "int64"
@@ -1807,7 +1962,16 @@ components:
           format: "int64"
         revoked:
           type: "boolean"
-        
+    Purchase:
+      allOf:
+        - $ref: '#/components/schemas/PurchaseOfUser'
+        - type: object
+          required:
+          - user_id
+          properties:
+            user_id:
+              type: "integer"
+              format: "int64"
     Product:
       required:
       - creation_date
@@ -1863,11 +2027,10 @@ components:
         debt_limit:
           type: integer
           format: int64
-    Refund:
+    RefundOfUser:
       required:
       - id
       - timestamp
-      - user_id
       - total_price
       - comment
       - revoked
@@ -1880,9 +2043,6 @@ components:
         timestamp:
           type: string
           format: date-time
-        user_id:
-          type: integer
-          format: int64
         total_price:
           type: integer
           format: int64
@@ -1893,6 +2053,16 @@ components:
         admin_id:
           type: integer
           format: int64
+    Refund:
+      allOf:
+        - $ref: '#/components/schemas/RefundOfUser'
+        - type: object
+          required:
+          - user_id
+          properties:
+            user_id:
+              type: integer
+              format: int64
     ReplenishmentNew:
       type: object
       required:
@@ -2216,43 +2386,6 @@ components:
           verification_date:
             type: string
             format: date-time
-    
-    UserDEP:
-      required:
-      - creation_date
-      - credit
-      - firstname
-      - id
-      - is_admin
-      - lastname
-      - rank_id
-      - verification_date
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        firstname:
-          type: string
-          example: Paul Thomas
-        lastname:
-          type: string
-          example: Mann
-        credit:
-          type: integer
-          description: Users credit in cents
-          format: int64
-        rank_id:
-          type: integer
-          format: int64
-        is_admin:
-          type: boolean
-        creation_date:
-          type: string
-          format: date-time
-        verification_date:
-          type: string
-          format: date-time
     Verification:
       required:
       - id
