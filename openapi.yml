@@ -918,7 +918,31 @@ paths:
           content: {}
       security:
       - bearerAuth: []
-  /register: {}
+  /register:
+    post:
+      tags:
+      - user
+      summary: Create user
+      description: Registration of new users.
+      operationId: createUser
+      requestBody:
+        description: Created user object
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/NewUser'
+        required: true
+      responses:
+        200:
+          description: User was sucessfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Created User.
   /replenishmentcollections: {}
   /replenishmentcollections/{replenishmentcollections-id}: {}
   /replenishments/{replenishment-id}: {}
@@ -1247,6 +1271,19 @@ components:
     RefundRevoke:
       allOf:
       - $ref: '#/components/schemas/Revoke'
+    NewUser:
+      type: object
+      required:
+        - lastname
+      properties:
+        lastname:
+          type: string
+        firstname:
+          type: string
+        password:
+          type: string
+        password_repeat:
+          type: string   
     User:
       required:
       - creation_date
