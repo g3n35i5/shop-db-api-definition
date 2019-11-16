@@ -1104,14 +1104,162 @@ paths:
     get:
   /stocktakingcollections/template:
     get:
+      tags:
+      - stocktakingcollection
+      summary: get a templatefile
+      description: This route can be used to retrieve a template to print out for a stocktaking. It lists all the products that must be included in the stocktaking.
+      responses:
+        200:
+          description: A pdf file
+          content:
+            'application/pdf':
+              schema:
+                type: string
+                format: binary
+      security:
+      - bearerAuth: []
   /stocktakingcollections:
     get:
+      tags:
+      - stocktakingcollection
+      summary: Returns a list of all StocktakingCollections.
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StocktakingCollectionBrief'
+      security:
+      - bearerAuth: []
     post:
-  /stocktakingcollections/{stocktakingcollections-id}:
+      tags:
+      - stocktakingcollection
+      summary: Creates a new StocktakingCollection
+      description: Insert a new StocktakingCollection.
+      operationId: createStocktakingCollection
+      requestBody:
+        description: Create a StocktakingCollection object
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/StocktakingCollectionNew'
+        required: true
+      responses:
+        201:
+          description: StocktakingCollection was sucessfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Created stocktakingcollection.
+      security:
+      - bearerAuth: []
+  /stocktakingcollections/{stocktakingcollection-id}:
+    parameters:
+    - name: stocktakingcollection-id
+      in: path
+      required: true
+      schema:
+        type: integer
     get:
+      tags:
+      - stocktakingcollection
+      summary: Returns a StocktakingCollection by id
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StocktakingCollection'
+      security:
+      - bearerAuth: []
     put:
+      tags:
+      - stocktakingcollection
+      summary: Updates a stocktakingcollection
+      description: This can only be done by an admin.
+      operationId: updateStocktakingCollection
+      requestBody:
+        description: The revoked property is mandatory.
+        content:
+          '*/*':
+            schema:
+              type: object
+              properties:
+                revoked:
+                  type: boolean
+        required: true
+      responses:
+        201:
+          description: StocktakingCollection was sucessfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Updated stocktakingcollection.
+                  updated_fields:
+                    type: array
+                    items:
+                      type: string
+        401:
+          description: error state
+          content: {}
+      security:
+      - bearerAuth: []
   /stocktakings/{stocktaking-id}:
+    parameters:
+    - name: stocktaking-id
+      in: path
+      required: true
+      schema:
+        type: integer
     put:
+      tags:
+      - stocktaking
+      summary: Updates a stocktaking
+      description: This can only be done by an admin.
+      operationId: updateStocktaking
+      requestBody:
+        description: The count property is mandatory.
+        content:
+          '*/*':
+            schema:
+              type: object
+              properties:
+                count:
+                  type: integer
+                  format: int64
+        required: true
+      responses:
+        201:
+          description: Stocktaking was sucessfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Updated stocktaking.
+                  updated_fields:
+                    type: array
+                    items:
+                      type: string
+        401:
+          description: error state
+          content: {}
+      security:
+      - bearerAuth: []
   /tagassignment/{command}:
     post:
   /tags:
@@ -1458,8 +1606,78 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/Replenishment'
-    StocktakingCollection:
+    StocktakingUpdate:
       type: object
+      required:
+        - count
+      properties:
+        count:
+          type: integer
+          format: int64
+    StocktakingNew:
+      allOf:
+        - $ref: '#/components/schemas/StocktakingUpdate'
+        - type: object
+          required:
+            - product_id
+          properties:
+            product_id:
+              type: integer
+              format: int64
+            set_inactive:
+              type: boolean
+    Stocktaking:
+      allOf:
+        - $ref: '#/components/schemas/StocktakingUpdate'
+        - type: object
+          properties:
+            collection_id:
+              type: integer
+              format: int64
+            id:
+              type: integer
+              format: int64
+            product_id:
+              type: integer
+              format: int64
+    StocktakingCollectionNew:
+      type: object
+      properties:
+        stocktakings:
+          type: array
+          items:
+            $ref: '#/components/schemas/StocktakingNew'
+        timestamp:
+          type: string
+          format: date-time
+    StocktakingCollectionBrief:
+      type: object
+      properties:
+        admin_id:
+          type: integer
+          format: int64
+        id:
+          type: integer
+          format: int64
+        revoked:
+          type: boolean
+        timestamp:
+          type: string
+          format: date-time
+    StocktakingCollection:
+      allOf:
+        - $ref: '#/components/schemas/StocktakingCollectionBrief'
+        - type: object
+          properties:
+            revokehistory:
+              type: array
+              items:
+                $ref: '#/components/schemas/StocktakingCollectionRevoke'
+            stocktakings:
+              type: array
+              items:
+                $ref: '#/components/schemas/Stocktaking'
+            
     Tag:
       required:
       - id
@@ -1529,6 +1747,9 @@ components:
     ReplenishmentCollectionRevoke:
       allOf:
       - $ref: '#/components/schemas/Revoke'
+    StocktakingCollectionRevoke:
+      allOf:
+      - $ref: '#/components/schemas/Revoke'
     NewUser:
       type: object
       required:
@@ -1541,7 +1762,7 @@ components:
         password:
           type: string
         password_repeat:
-          type: string   
+          type: string
     User:
       required:
       - creation_date
