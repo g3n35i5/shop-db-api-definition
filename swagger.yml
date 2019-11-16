@@ -1,0 +1,111 @@
+swagger: '2.0'
+info:
+    title: ShopDB API
+    description: This is the API for shopdb2
+    version: v2
+paths:
+    /backups
+        get:
+    /deposits
+        get:
+        post:
+    /deposits/batch
+        post:
+    /deposits/{user-id}
+        get:
+        put:
+    /financial_overview
+        get:
+    /images
+        get:
+    /images/{image-name}
+    /login
+        post:
+    /maintenance
+        post:
+    /payoffs
+        get:
+        post:
+    /payoffs/{payoff-id}
+        get:
+        put:
+    /products
+        get:
+        post:
+    /products/{product-id}
+        get:
+        put:
+    /products/{product-id}/pricehistory
+        get:
+    /purchases
+        get:
+        post:
+    /purchases/{purchase-id}
+        get:
+        put:
+    /ranks
+        get:
+    /refunds
+        get:
+        post:
+    /refunds/{refund-id}
+        get:
+        put:
+    /register
+        post:
+    /replenishmentcollections
+        get:
+        post:
+    /replenishmentcollections/{replenishmentcollections-id}
+        get:
+        post:
+    /replenishments/{replenishment-id}
+        put:
+    /stocktakingcollections
+        get:
+        post:
+    /stocktakingcollections/{stocktakingcollections-id}
+        get:
+        put:
+    /stocktakings/{stocktaking-id}
+        put:
+    /tagassignment/{command}
+        post:
+    /tags
+        get:
+        post:
+    /tags/{tag-id}
+        delete:
+        get:
+        put:
+    /turnovers
+        get:
+        put:
+    /turnovers/{turnover-id}
+        get:
+        put:
+    /upload
+        post:
+    /users
+        get:
+    /users/{user-id}
+        delete:
+        get:
+        put:
+    /users/{user-id}/deposits
+        get:
+    /users/{user-id}/favourites
+        get:
+    /users/{user-id}/purchases
+        get:
+    /users/{user-id}/refunds
+        get:
+    /verifications
+        get:
+    /verify/{verification-id}
+definitions:
+    # Added by API Auto Mocking Plugin
+    host: mybookstore.com
+    basePath: /api/v1
+    schemes:
+        - https
