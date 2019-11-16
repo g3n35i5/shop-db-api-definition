@@ -27,6 +27,8 @@ paths:
                     example: "Backend is online."
     /backups:
         get:
+          security:
+          - bearerAuth: []
           tags:
           - "backup"
           summary: "Returns a dict holding all backups and the timestamp of the latest one."
