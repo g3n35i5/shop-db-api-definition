@@ -63,6 +63,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Deposit'
+      security:
+      - bearerAuth: []
     post:
       tags:
       - deposit
@@ -99,6 +101,8 @@ paths:
           description: error state
           content: {}
       x-codegen-request-body-name: body
+      security:
+      - bearerAuth: []
   /deposits/batch:
     post:
       tags:
@@ -140,7 +144,15 @@ paths:
           description: error state
           content: {}
       x-codegen-request-body-name: body
+      security:
+      - bearerAuth: []
   /deposits/{deposit-id}:
+    parameters:
+    - name: deposit-id
+      in: path
+      required: true
+      schema:
+        type: integer
     get:
       tags:
       - deposit
@@ -204,6 +216,8 @@ paths:
           description: error state
           content: {}
       x-codegen-request-body-name: body
+      security:
+      - bearerAuth: []
   /financial_overview:
     get:
       tags:
@@ -287,6 +301,8 @@ paths:
                         minimum: 0
                         type: integer
                         format: int64
+      security:
+      - bearerAuth: []
   /images:
     get:
       tags:
@@ -311,7 +327,7 @@ paths:
       parameters:
       - name: image-name
         in: path
-        description: 'can be left empty to retrieve the '
+        description: 'can be left empty to retrieve the default image'
         required: true
         schema:
           type: string
@@ -324,11 +340,235 @@ paths:
                 type: string
                 description: the requested product image
                 format: binary
-  /login: {}
-  /maintenance: {}
-  /payoffs: {}
-  /payoffs/{payoff-id}: {}
-  /products: {}
+  /login:
+    post:
+      tags:
+      - user
+      summary: Logs user into the system
+      operationId: loginUser
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoibWFuaXNoIn0.JX4_nxeJAY8lOSrTiyzU43eKt-qEWXtNhkPwfLWanUY"
+  /maintenance:
+    post:
+      tags:
+      - maintenance
+      summary: Set the maintenance state
+      operationId: toggleMaintenance
+      requestBody:
+        description: "contains the new state"
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                state:
+                  type: boolean
+        required: true
+      responses:
+        200:
+          description: Deposit was sucessfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Turned maintenance mode off."
+      security:
+      - bearerAuth: []
+  /payoffs:
+    get:
+      tags:
+      - payoff
+      summary: Returns a list of all payoffs.
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Payoff'
+      security:
+      - bearerAuth: []
+    post:
+      tags:
+      - payoff
+      summary: Creates a new Payoff.
+      operationId: addPayoff
+      requestBody:
+        description: "the amount paid out as well as the reason"
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: integer
+                  format: int64
+                comment:
+                  type: string
+        required: true
+      responses:
+        200:
+          description: Payout was sucessfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Created payoff."
+      security:
+      - bearerAuth: []
+  /payoffs/{payoff-id}:
+    parameters:
+    - name: payoff-id
+      in: path
+      required: true
+      schema:
+        type: integer
+    get:
+      tags:
+      - payoff
+      summary: Returns the payoff with the requested id.
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                  timestamp:
+                    type: string
+                    format: date-time
+                  amount:
+                    type: integer
+                    format: int64
+                  comment:
+                    type: string
+                  revoked:
+                    type: boolean
+                  revokehistory:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PayoffRevoke'
+    put:
+      tags:
+      - payoff
+      summary: Updates a payoff
+      description: This can only be done by an admin.
+      operationId: updatePayoff
+      requestBody:
+        description: Updated payoff revocation state
+        content:
+          '*/*':
+            schema:
+              type: object
+              properties:
+                revoked:
+                  type: boolean
+        required: true
+      responses:
+        201:
+          description: Deposit was sucessfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Updated deposit.
+        401:
+          description: error state
+          content: {}
+      x-codegen-request-body-name: body
+      security:
+      - bearerAuth: []
+  /products:
+    get:
+      tags:
+      - product
+      summary: Returns a list of all products.
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+      security:
+      - bearerAuth: []
+    post:
+      tags:
+      - product
+      summary: Add a new product
+      operationId: addProduct
+      requestBody:
+        description: Product object that needs to be added
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                price:
+                  type: integer
+                  format: int64
+                tags:
+                  type: array
+                  items:
+                    type: integer
+                    format: int64
+                active:
+                  type: boolean
+                barcode:
+                  type: string
+                countable:
+                  type: boolean
+                imagename:
+                  type: string
+                revocable:
+                  type: boolean
+        required: true
+      responses:
+        200:
+          description: Product was sucessfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Created Product.
+        401:
+          description: error state
+          content: {}
+      security:
+      - bearerAuth: []
   /products/{product-id}: {}
   /products/{product-id}/pricehistory: {}
   /purchases: {}
@@ -469,17 +709,37 @@ components:
         user_id:
           type: integer
           format: int64
+    Payoff:
+      required:
+      - admin_id
+      - amount
+      - comment
+      - id
+      - revoked
+      - timestamp
+      properties:
+        admin_id:
+          type: "integer"
+          format: "int64"
+        amount:
+          type: "integer"
+          format: "int64"
+        comment:
+          type: "string"
+        id:
+          type: "integer"
+          format: "int64"
+        revoked:
+          type: "boolean"
+        timestamp:
+          type: "string"
+          format: "date-time"
     Product:
       required:
-      - active
-      - barcode
-      - countable
       - creation_date
       - id
-      - imagename
       - name
       - price
-      - revocable
       - tags
       type: object
       properties:
@@ -588,6 +848,9 @@ components:
         timestamp:
           type: string
           format: date-time
+    PayoffRevoke:
+      allOf:
+      - $ref: '#/components/schemas/Revoke'
     User:
       required:
       - creation_date
@@ -638,4 +901,8 @@ components:
         lastname:
           type: string
           example: Mann
-
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT 
