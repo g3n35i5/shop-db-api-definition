@@ -987,11 +987,12 @@ paths:
       - bearerAuth: []
   /replenishmentcollections/{replenishmentcollections-id}:
     parameters:
-    - name: replenishmentcollection-id
+    - name: replenishmentcollections-id
       in: path
       required: true
       schema:
         type: integer
+        format: int64
     get:
       tags:
       - replenishmentcollection
@@ -1723,6 +1724,13 @@ paths:
       security:
       - bearerAuth: []
   /users/{user-id}/deposits:
+    parameters:
+    - name: user-id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
     get:
       tags:
       - user
@@ -1737,6 +1745,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/DepositOfUser'
   /users/{user-id}/favorites:
+    parameters:
+    - name: user-id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
     get:
       tags:
       - user
@@ -1752,6 +1767,13 @@ paths:
                   type: integer
                   format: int64
   /users/{user-id}/purchases:
+    parameters:
+    - name: user-id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
     get:
       tags:
       - user
@@ -1766,6 +1788,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/PurchaseOfUser'
   /users/{user-id}/refunds:
+    parameters:
+    - name: user-id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
     get:
       tags:
       - user
