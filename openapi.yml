@@ -56,6 +56,10 @@ paths:
       tags:
       - deposit
       summary: Returns a list of all deposits.
+      parameters:
+        - $ref: '#/components/parameters/paginationQueryParam'
+        - $ref: '#/components/parameters/paginationFilterParam'
+        - $ref: '#/components/parameters/paginationSortParam'
       responses:
         200:
           description: successful operation
@@ -395,6 +399,10 @@ paths:
       tags:
       - payoff
       summary: Returns a list of all payoffs.
+      parameters:
+        - $ref: '#/components/parameters/paginationQueryParam'
+        - $ref: '#/components/parameters/paginationFilterParam'
+        - $ref: '#/components/parameters/paginationSortParam'
       responses:
         200:
           description: successful operation
@@ -511,6 +519,10 @@ paths:
       tags:
       - product
       summary: Returns a list of all products.
+      parameters:
+        - $ref: '#/components/parameters/paginationQueryParam'
+        - $ref: '#/components/parameters/paginationFilterParam'
+        - $ref: '#/components/parameters/paginationSortParam'
       responses:
         200:
           description: successful operation
@@ -685,6 +697,10 @@ paths:
       tags:
       - purchase
       summary: Returns a list of all purchases.
+      parameters:
+        - $ref: '#/components/parameters/paginationQueryParam'
+        - $ref: '#/components/parameters/paginationFilterParam'
+        - $ref: '#/components/parameters/paginationSortParam'
       responses:
         200:
           description: successful operation
@@ -801,6 +817,10 @@ paths:
       tags:
       - rank
       summary: Returns a list of all ranks.
+      parameters:
+        - $ref: '#/components/parameters/paginationQueryParam'
+        - $ref: '#/components/parameters/paginationFilterParam'
+        - $ref: '#/components/parameters/paginationSortParam'
       responses:
         200:
           description: successful operation
@@ -815,6 +835,10 @@ paths:
       tags:
       - refunds
       summary: Returns a list of all refunds.
+      parameters:
+        - $ref: '#/components/parameters/paginationQueryParam'
+        - $ref: '#/components/parameters/paginationFilterParam'
+        - $ref: '#/components/parameters/paginationSortParam'
       responses:
         200:
           description: successful operation
@@ -950,6 +974,10 @@ paths:
       tags:
       - replenishmentcollection
       summary: Returns a list of all ReplenishmentCollections.
+      parameters:
+        - $ref: '#/components/parameters/paginationQueryParam'
+        - $ref: '#/components/parameters/paginationFilterParam'
+        - $ref: '#/components/parameters/paginationSortParam'
       responses:
         200:
           description: successful operation
@@ -1153,6 +1181,10 @@ paths:
       tags:
       - stocktakingcollection
       summary: Returns a list of all StocktakingCollections.
+      parameters:
+        - $ref: '#/components/parameters/paginationQueryParam'
+        - $ref: '#/components/parameters/paginationFilterParam'
+        - $ref: '#/components/parameters/paginationSortParam'
       responses:
         200:
           description: successful operation
@@ -1625,6 +1657,10 @@ paths:
       - user
       summary: Returns a list of all users.
       description: Requesting this ressource while being an authenticated admin, yields more detailed results.
+      parameters:
+        - $ref: '#/components/parameters/paginationQueryParam'
+        - $ref: '#/components/parameters/paginationFilterParam'
+        - $ref: '#/components/parameters/paginationSortParam'
       responses:
         200:
           description: successful operation
@@ -1813,6 +1849,10 @@ paths:
       tags:
       - verification
       summary: Returns a list of all verifications.
+      parameters:
+        - $ref: '#/components/parameters/paginationQueryParam'
+        - $ref: '#/components/parameters/paginationFilterParam'
+        - $ref: '#/components/parameters/paginationSortParam'
       responses:
         200:
           description: successful operation
@@ -1864,7 +1904,45 @@ paths:
       security:
       - bearerAuth: []
 components:
+  parameters:
+    paginationQueryParam:
+      name: pagination
+      in: query
+      description: Paginates the content
+      required: false
+      schema:
+        type: object
+        properties:
+          page:
+            type: integer
+          perPage:
+            type: integer
+    paginationFilterParam:
+      name: filter
+      in: query
+      description: Filters the content
+      required: false
+      schema:
+        type: object
+        properties:
+          fieldName:
+            type: string
+    paginationSortParam:
+      name: sort
+      in: query
+      description: Sorts the content
+      required: false
+      schema:
+        type: object
+        properties:
+          field:
+            type: string
+          order:
+            type: string
+
   schemas:
+    AnyValue:
+      description: Can be any value - string, number or boolean
     Balance:
       type: object
       properties:
