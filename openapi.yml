@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: ShopDB API
   description: This is the API for shopdb2
-  version: v2
+  version: v2.1
 servers:
 - url: https://shop.gatrobe.de/api
 tags:
@@ -1862,6 +1862,20 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Verification'
+      security:
+      - bearerAuth: []
+  /verifications/count:
+     get:
+        tags:
+        - verification
+        summary: Returns the amount of currently pending verifications.
+        responses:
+          200:
+            description: successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/PendingCount'
   /verify/{user-id}:
     parameters:
     - name: user-id
@@ -2426,6 +2440,14 @@ components:
     PurchaseRevoke:
       allOf:
       - $ref: '#/components/schemas/Revoke'
+    PendingCount:
+      required:
+      - id
+      type: object
+      properties:
+        pending:
+          type: integer
+          format: int64
     RefundRevoke:
       allOf:
       - $ref: '#/components/schemas/Revoke'
