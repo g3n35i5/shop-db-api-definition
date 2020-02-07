@@ -1862,6 +1862,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Verification'
+      security:
+      - bearerAuth: []
   /verify/{user-id}:
     parameters:
     - name: user-id
